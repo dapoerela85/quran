@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <a href="index.html" class="btn btn-secondary mb-3">Back to Surahs</a>
+        <div id="surah-info">
+            <!-- Surah info will be loaded here -->
+        </div>
+        <div id="verses-container" class="mt-4">
+            <!-- Verses will be loaded here -->
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const surahNumber = parseInt(urlParams.get('surah'));
+    if (surahNumber) {
+        loadSurah(surahNumber);
+    } else {
+        window.location.href = 'index.html';
+    }
+});
+</script>
+</body>
+</html>
