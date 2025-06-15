@@ -6,7 +6,7 @@ async function fetchQuranData() {
     try {
         if (quranData) return quranData;
         
-        const response = await fetch('https://cdn.jsdelivr.net/npm/quran-json@3.1.2/json/quran_en.json');
+        const response = await fetch('https://cdn.jsdelivr.net/npm/quran-cloud@1.0.0/dist/quran_en.json');
         if (!response.ok) throw new Error('Network response was not ok');
         
         quranData = await response.json();
