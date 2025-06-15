@@ -6,11 +6,11 @@ async function fetchQuranData() {
     try {
         if (quranData) return quranData;
         
-        const response = await fetch('https://cdn.jsdelivr.net/npm/quran-cloud@1.0.0/dist/quran_en.json');
+        const response = await fetch('https://cdn.jsdelivr.net/npm/quran-json@3.1.2/json/quran_en.json');
         if (!response.ok) throw new Error('Network response was not ok');
         
         quranData = await response.json();
-        if (!Array.isArray(quranData) || quranData.length !== 114) {
+        if (!quranData || !quranData.surahs) {
             throw new Error('Invalid Quran data format');
         }
         
@@ -32,18 +32,17 @@ function showError(message) {
 
 // Load all surahs on the homepage
 async function loadSurahs() {
-    const quranData = await fetchQuranData();
-    if (!quranData) {
-        alert('Failed to load Quran data. Please try again later.');
-        return;
-    }
-
     const container = document.getElementById('surahs-container');
     if (!container) return;
     
-    container.innerHTML = ''; // Clear loading state
+    container.innerHTML = '<div class="text-center">Loading surahs...</div>';
     
-    quranData.forEach(surah => {
+    const quranData = await fetchQuranData();
+    if (!quranData) return;
+    
+    container.innerHTML = '';
+    
+    quranData.surahs.forEach(surah => {
         const surahCard = document.createElement('div');
         surahCard.className = 'col-md-4 col-sm-6 mb-4';
         surahCard.innerHTML = `
@@ -51,7 +50,7 @@ async function loadSurahs() {
                 <div class="card-body">
                     <h5 class="card-title">${surah.number}. ${surah.name} (${surah.englishName})</h5>
                     <p class="card-text">${surah.englishNameTranslation}</p>
-                    <p class="card-text"><small class="text-muted">${surah.numberOfAyahs} verses • ${surah.revelationType}</small></p>
+                    <p class="card-text"><small class="text-muted">${surah.ayahs.length} verses • ${surah.revelationType}</small></p>
                     <a href="surah.html?surah=${surah.number}" class="btn btn-primary">Read Surah</a>
                 </div>
             </div>
@@ -62,56 +61,48 @@ async function loadSurahs() {
 
 // Load a single surah
 async function loadSurah(surahNumber) {
-    const quranData = await fetchQuranData();
-    if (!quranData) {
-        alert('Failed to load Quran data. Please try again later.');
+    surahNumber = parseInt(surahNumber);
+    if (isNaN(surahNumber) || surahNumber < 1 || surahNumber > 114) {
+        showError('Invalid surah number');
+        setTimeout(() => window.location.href = 'index.html', 2000);
         return;
     }
 
-    const surah = quranData.find(s => s.number === surahNumber);
-    if (!surah) {
-        alert('Surah not found.');
-        window.location.href = 'index.html';
-        return;
-    }
-
-// In loadSurah function
-if (isNaN(surahNumber) || surahNumber < 1 || surahNumber > 114) {
-    alert('Invalid surah number.');
-    window.location.href = 'index.html';
-    return;
-}
-
-// In loadVerse function
-if (isNaN(verseNumber) || verseNumber < 1) {
-    alert('Invalid verse number.');
-    window.location.href = `surah.html?surah=${surahNumber}`;
-    return;
-}
-
-    // Display surah info
     const surahInfo = document.getElementById('surah-info');
+    const versesContainer = document.getElementById('verses-container');
+    
+    if (surahInfo) surahInfo.innerHTML = '<div class="text-center">Loading surah info...</div>';
+    if (versesContainer) versesContainer.innerHTML = '<div class="text-center">Loading verses...</div>';
+    
+    const quranData = await fetchQuranData();
+    if (!quranData) return;
+    
+    const surah = quranData.surahs.find(s => s.number === surahNumber);
+    if (!surah) {
+        showError('Surah not found');
+        setTimeout(() => window.location.href = 'index.html', 2000);
+        return;
+    }
+
     if (surahInfo) {
         surahInfo.innerHTML = `
             <div class="surah-info">
                 <h2>${surah.number}. ${surah.name} (${surah.englishName})</h2>
                 <h3 class="text-muted">${surah.englishNameTranslation}</h3>
-                <p>Revelation Type: ${surah.revelationType} | Verses: ${surah.numberOfAyahs}</p>
+                <p>Revelation Type: ${surah.revelationType} | Verses: ${surah.ayahs.length}</p>
             </div>
         `;
     }
 
-    // Display verses
-    const versesContainer = document.getElementById('verses-container');
     if (versesContainer) {
-        versesContainer.innerHTML = ''; // Clear loading state
+        versesContainer.innerHTML = '';
         
         surah.ayahs.forEach(ayah => {
             const verseCard = document.createElement('div');
-            verseCard.className = 'verse-card';
+            verseCard.className = 'verse-card mb-3 p-3 border rounded';
             verseCard.innerHTML = `
                 <div>
-                    <span class="verse-number">${ayah.numberInSurah}</span>
+                    <span class="verse-number badge bg-primary">${ayah.numberInSurah}</span>
                     <span class="arabic-text">${ayah.text}</span>
                 </div>
                 <div class="translation mt-2">${ayah.translation}</div>
@@ -126,38 +117,53 @@ if (isNaN(verseNumber) || verseNumber < 1) {
 
 // Load a single verse
 async function loadVerse(surahNumber, verseNumber) {
-    const quranData = await fetchQuranData();
-    if (!quranData) {
-        alert('Failed to load Quran data. Please try again later.');
+    surahNumber = parseInt(surahNumber);
+    verseNumber = parseInt(verseNumber);
+    
+    if (isNaN(surahNumber) || surahNumber < 1 || surahNumber > 114) {
+        showError('Invalid surah number');
+        setTimeout(() => window.location.href = 'index.html', 2000);
+        return;
+    }
+    
+    if (isNaN(verseNumber) || verseNumber < 1) {
+        showError('Invalid verse number');
+        setTimeout(() => window.location.href = `surah.html?surah=${surahNumber}`, 2000);
         return;
     }
 
-    const surah = quranData.find(s => s.number === surahNumber);
+    const verseContainer = document.getElementById('verse-container');
+    if (verseContainer) verseContainer.innerHTML = '<div class="text-center">Loading verse...</div>';
+    
+    const quranData = await fetchQuranData();
+    if (!quranData) return;
+    
+    const surah = quranData.surahs.find(s => s.number === surahNumber);
     if (!surah) {
-        alert('Surah not found.');
-        window.location.href = 'index.html';
+        showError('Surah not found');
+        setTimeout(() => window.location.href = 'index.html', 2000);
         return;
     }
 
     const verse = surah.ayahs.find(a => a.numberInSurah === verseNumber);
     if (!verse) {
-        alert('Verse not found.');
-        window.location.href = `surah.html?surah=${surahNumber}`;
+        showError('Verse not found');
+        setTimeout(() => window.location.href = `surah.html?surah=${surahNumber}`, 2000);
         return;
     }
 
-    const verseContainer = document.getElementById('verse-container');
     if (verseContainer) {
         verseContainer.innerHTML = `
             <div class="single-verse">
                 <h3>Surah ${surah.englishName} (${surah.name}), Verse ${verse.numberInSurah}</h3>
-                <div class="arabic-text mt-4">
+                <div class="arabic-text mt-4 fs-4 text-end">
                     ${verse.text}
                 </div>
                 <div class="translation mt-4">
                     <h4>Translation:</h4>
                     <p>${verse.translation}</p>
                 </div>
+                <a href="surah.html?surah=${surah.number}" class="btn btn-secondary mt-3">Back to Surah</a>
             </div>
         `;
     }

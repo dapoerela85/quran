@@ -19,16 +19,16 @@
     </div>
 
     <script src="js/script.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const surahNumber = parseInt(urlParams.get('surah'));
-    if (surahNumber) {
-        loadSurah(surahNumber);
-    } else {
-        window.location.href = 'index.html';
-    }
-});
-</script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const surahNumber = urlParams.get('surah');
+            if (surahNumber) {
+                loadSurah(surahNumber);
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
 </body>
 </html>

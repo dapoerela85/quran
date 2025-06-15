@@ -9,32 +9,25 @@
 </head>
 <body>
     <div class="container mt-4">
-        <a href="surah.html?surah=1" id="back-to-surah" class="btn btn-secondary mb-3">Back to Surah</a>
+        <a href="index.html" class="btn btn-secondary mb-3">Back to Surahs</a>
         <div id="verse-container">
             <!-- Verse will be loaded here -->
         </div>
     </div>
 
     <script src="js/script.js"></script>
-<!-- Update verse.html script section -->
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const surahNumber = parseInt(urlParams.get('surah'));
-    const verseNumber = parseInt(urlParams.get('verse'));
-    
-    if (surahNumber && verseNumber) {
-        // Update back button link
-        const backButton = document.getElementById('back-to-surah');
-        if (backButton) {
-            backButton.href = `surah.html?surah=${surahNumber}`;
-        }
-        
-        loadVerse(surahNumber, verseNumber);
-    } else {
-        window.location.href = 'index.html';
-    }
-});
-</script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const surahNumber = urlParams.get('surah');
+            const verseNumber = urlParams.get('verse');
+            
+            if (surahNumber && verseNumber) {
+                loadVerse(surahNumber, verseNumber);
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
 </body>
 </html>
